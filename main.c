@@ -151,3 +151,4 @@ void trace(int argc, char *argv[]){
     arguments[i] = NULL;
 
     execvp("strace", arguments);
+}
