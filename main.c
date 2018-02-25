@@ -11,57 +11,6 @@
 static struct termios initial_settings, new_settings;
 static int peek_character = -1;
 
-// MAIN  --------------------------------------------------------------------------------------
-
-int main(int argc, char *argv[]) {
-
-    setlogmask (LOG_UPTO (LOG_DEBUG));
-    openlog(">>rastreador>>", LOG_PID|LOG_CONS, LOG_USER);
-    syslog(LOG_DEBUG, "Iniciando Programa");
-
-    int opt;
-    while((opt = getopt(argc, argv, "-v:V")) != EOF) {
-
-
-        switch (opt) {
-            case 'v':
-                syslog(LOG_DEBUG, "Llamando a funcion de rastreo con -v");
-                trace(argc, argv);
-                break;
-            case 'V':
-                syslog(LOG_DEBUG, "Llamando a funcion de rastreo con -V");
-                puts("Presione cualquier tecla para continuar ...");
-
-                int ch = 0;
-                init_keyboard();
-                while(ch == 0) {
-                    //Monitoreo de terminal en intervalos de 1 segundo.
-                    sleep(1);
-                    if(keyboardInt()) {
-                        ch = readch();
-                        syslog(LOG_DEBUG, "tecla presionada: %c\n",ch); //logueo de informacion
-                        trace(argc, argv);
-                    }
-                }
-                break;
-                //validacion de argumentos y formacion de string/cadena.
-            case ':':
-                usageError(argv[0], "Falta parametro/argumento", optopt);
-            case '?':
-                usageError(argv[0], "Opcion invalida", optopt);
-            default:
-                usageError(argv[0], "Falta parametro/argumento", optopt);
-        }
-
-        syslog(LOG_DEBUG, "opt =%3d (%c); optind = %d", opt, printable(opt), optind);
-        if (opt == '?' || opt == ':') {
-            syslog(LOG_DEBUG, "; optopt =%3d (%c)", optopt, printable(optopt));
-        }
-    }
-    closelog();
-
-    return 0;
-}
 // interacion con el teclado.
 
 void init_keyboard() {
@@ -151,4 +100,55 @@ void trace(int argc, char *argv[]){
     arguments[i] = NULL;
 
     execvp("strace", arguments);
+}
+// MAIN  --------------------------------------------------------------------------------------
+
+int main(int argc, char *argv[]) {
+
+    setlogmask (LOG_UPTO (LOG_DEBUG));
+    openlog(">>rastreador>>", LOG_PID|LOG_CONS, LOG_USER);
+    syslog(LOG_DEBUG, "Iniciando Programa");
+
+    int opt;
+    while((opt = getopt(argc, argv, "-v:V")) != EOF) {
+
+
+        switch (opt) {
+            case 'v':
+                syslog(LOG_DEBUG, "Llamando a funcion de rastreo con -v");
+                trace(argc, argv);
+                break;
+            case 'V':
+                syslog(LOG_DEBUG, "Llamando a funcion de rastreo con -V");
+                puts("Presione cualquier tecla para continuar ...");
+
+                int ch = 0;
+                init_keyboard();
+                while(ch == 0) {
+                    //Monitoreo de terminal en intervalos de 1 segundo.
+                    sleep(1);
+                    if(keyboardInt()) {
+                        ch = readch();
+                        syslog(LOG_DEBUG, "tecla presionada: %c\n",ch); //logueo de informacion
+                        trace(argc, argv);
+                    }
+                }
+                break;
+                //validacion de argumentos y formacion de string/cadena.
+            case ':':
+                usageError(argv[0], "Falta parametro/argumento", optopt);
+            case '?':
+                usageError(argv[0], "Opcion invalida", optopt);
+            default:
+                usageError(argv[0], "Falta parametro/argumento", optopt);
+        }
+
+        syslog(LOG_DEBUG, "opt =%3d (%c); optind = %d", opt, printable(opt), optind);
+        if (opt == '?' || opt == ':') {
+            syslog(LOG_DEBUG, "; optopt =%3d (%c)", optopt, printable(optopt));
+        }
+    }
+    closelog();
+
+    return 0;
 }
